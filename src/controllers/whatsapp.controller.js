@@ -1,4 +1,5 @@
 const fs = require("fs");
+const sendMessagesWhatsapp = require("../services/whastapp.service");
 
 const myConsole = new console.Console(fs.createWriteStream("./logs.txt"));
 
@@ -27,11 +28,37 @@ const receivedMessage = (req, res) => {
     const changes = (entry["changes"])[0];
     const value = changes["value"];
     const messageObject = value["messages"];
-    myConsole.log("messageObject", messageObject);
+    
+    if (typeof messageObject !== "undefined") {
+      const text = getTextUser(messageObject[0]);
+      myConsole.log(text)
+
+      sendMessagesWhatsapp(`enviaste un mensaje diciendo: ${text}.`, messageObject["from"])
+    }
     res.send("EVENT_RECEIVED");
   } catch (error) {
     res.send("EVENT_RECEIVED");
   }
+}
+
+const getTextUser = (message) => {
+  let text = ""
+  const typeOfMessage = message["type"]
+
+  if ( typeOfMessage === "text") {
+    text = (message["text"])["body"]
+  } else if ( typeOfMessage === "interactive") {
+    const interactiveObject = message["interactive"]
+    interactiveObject["type"] === "button_reply"
+      ? text = (interactiveObject["button_reply"])["title"]
+      : interactiveObject["type"] === "list_reply"
+        ? text = (interactiveObject["list_reply"])["title"]
+        : myConsole("No se puedo obtener el formato del mensaje del usuario...")
+  } else {
+    myConsole("No se puedo obtener el formato del mensaje del usuario...")
+  }
+
+  return text;
 }
 
 module.exports = {
