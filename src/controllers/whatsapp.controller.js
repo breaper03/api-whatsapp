@@ -33,7 +33,7 @@ const receivedMessage = (req, res) => {
       const text = getTextUser(messageObject[0]);
       myConsole.log(text)
 
-      sendMessagesWhatsapp(`enviaste un mensaje diciendo: ${text}.`, messageObject["from"])
+      sendMessagesWhatsapp(`enviaste un mensaje diciendo: ${text}.`, messageObject[0]["from"])
     }
     res.send("EVENT_RECEIVED");
   } catch (error) {
